@@ -2,12 +2,17 @@ package com.example.account.service;
 
 import com.example.account.dto.LoanFormDto;
 import com.example.account.dto.UserLoanDto;
+import com.example.account.dto.converter.UserLoanDtoConverter;
 import com.example.account.entity.UserLoan;
+import com.example.account.entity.UserLoanExtension;
+import com.example.account.repository.UserLoanExtensionRepository;
 import com.example.account.repository.UserLoanRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static java.util.Objects.nonNull;
 
@@ -16,6 +21,8 @@ import static java.util.Objects.nonNull;
 public class LoanService {
 
     private final UserLoanRepository userLoanRepository;
+    private final UserLoanExtensionRepository extensionRepository;
+    private final UserLoanDtoConverter converter;
 
     public Boolean create(long userId, LoanFormDto form) {
         if (!isValid(form)) {
@@ -36,15 +43,37 @@ public class LoanService {
     }
 
     public List<UserLoanDto> getLoans(long userId) {
-        return null;
+        List<UserLoan> loans = userLoanRepository.findByUserId(userId);
+        return loans.stream()
+                .map(converter::convert)
+                .collect(Collectors.toList());
     }
 
-    public UserLoanDto getLoanDetail(long userId, long loanId) {
-        return null;
+    public UserLoanDto getLoanDetail(long userId, long userLoanId) throws Exception {
+        Optional<UserLoan> loanOptional = userLoanRepository.findById(userLoanId);
+        if (!loanOptional.isPresent()) {
+            throw new Exception("loan not found");
+        }
+        if (loanOptional.get().getUserId() != userId) {
+            throw new Exception("userId of userLoan does not match");
+        }
+
+        UserLoan loan = loanOptional.get();
+        Optional<UserLoanExtension> extensionOptional = extensionRepository.findByUserLoanId(loan.getUserLoanId());
+        return extensionOptional.isPresent() ?
+                converter.convertDetail(loan, extensionOptional.get())
+                : converter.convert(loan);
     }
 
-    public Boolean delete(long userId, long loanId) {
-        return null;
+    public Boolean delete(long userId, long userLoanId) {
+        Optional<UserLoan> loanOptional = userLoanRepository.findById(userLoanId);
+        if (loanOptional.isPresent()) {
+            UserLoan loan = loanOptional.get();
+            if (loan.getUserId() == userId) {
+                userLoanRepository.delete(loan);
+            }
+        }
+        return Boolean.TRUE;
     }
 
     private boolean isValid(LoanFormDto form) {

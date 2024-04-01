@@ -40,22 +40,20 @@ public class LoanController {
 
     @GetMapping("/{loanId}")
     public Response<UserLoanDto> getLoanDetail(@RequestHeader("userId") long userId,
-                                         @PathVariable("loanId") long loanId) {
+                                         @PathVariable("loanId") long userLoanId) {
         try {
-            UserLoanDto loan = loanService.getLoanDetail(userId, loanId);
+            UserLoanDto loan = loanService.getLoanDetail(userId, userLoanId);
             return Response.success(loan);
         } catch (Exception e) {
-            return Response.errorResponse(500, new ErrorResponse("internal server error"));
+            return Response.errorResponse(401, new ErrorResponse("Invalid access"));
         }
     }
 
     @DeleteMapping("/{loanId}")
     public Response<UserLoanDto> deleteLoan(@RequestHeader("userId") long userId,
-                                         @PathVariable("loanId") long loanId) {
-        Boolean success = loanService.delete(userId, loanId);
-
-        return BooleanUtils.isTrue(success) ? Response.success(true)
-                : Response.errorResponse(400, new ErrorResponse("Bad request: invalid input"));
+                                         @PathVariable("loanId") long userLoanId) {
+        loanService.delete(userId, userLoanId);
+        return Response.success(true);
 
     }
 

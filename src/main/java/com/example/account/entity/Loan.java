@@ -12,7 +12,7 @@ public class Loan {
     private Long loanId;
 
     @Column(nullable = false)
-    private Long bankId;
+    private String bankCode;
 
     @Column(nullable = false)
     private String name;
