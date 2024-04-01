@@ -2,7 +2,7 @@ plugins {
 	id 'java'
 	id 'groovy'
 	id 'org.springframework.boot' version '3.2.4'
-	id 'io.spring.dependency-management' version '1.1.4'
+	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
 }
 
 group = 'com.example'
@@ -28,20 +28,20 @@ dependencies {
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	implementation 'org.springframework.boot:spring-boot-starter-validation:2.4.0'
+	implementation 'org.apache.commons:commons-configuration2:2.10.1'
 
 	// test dependencies
-	testImplementation 'org.spockframework:spock-core:2.4-M1-groovy-4.0'
+	testImplementation 'org.codehaus.groovy:groovy-all:3.0.8'
+	testImplementation 'org.spockframework:spock-core:2.0-groovy-3.0'
 	testImplementation 'org.junit.jupiter:junit-jupiter:5.9.2'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
-tasks.named('test') {
+tasks.withType(Test) {
 	useJUnitPlatform()
 }
 
 test {
 	useJUnitPlatform()
-	testLogging {
-		events "started", "passed", "skipped", "failed"
-	}
 }
