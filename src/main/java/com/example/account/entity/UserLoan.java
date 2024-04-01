@@ -1,10 +1,12 @@
 package com.example.account.entity;
 
 import jakarta.persistence.*;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+@Setter
 @Entity
 public class UserLoan {
 
