@@ -6,14 +6,12 @@ import com.example.account.dto.UserFormDto;
 import com.example.account.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 
-import static java.util.Objects.nonNull;
 
 @RequiredArgsConstructor
 @RestController
@@ -24,17 +22,10 @@ public class UserController {
 
     @PostMapping("/sign-up")
     public Response<Boolean> signup(@Valid @RequestBody UserFormDto form) {
-        if (!isValid(form)) {
-            return Response.errorResponse(400, new ErrorResponse("Bad request: invalid input"));
-        }
+        Boolean success = userService.signup(form);
 
-        return Response.success(userService.signup(form));
-    }
-
-    private boolean isValid(UserFormDto form) {
-        return nonNull(form)
-                && StringUtils.isNotEmpty(form.getName())
-                && nonNull(form.getBirthDate());
+        return success ? Response.success(true)
+                : Response.errorResponse(400, new ErrorResponse("Bad request: invalid input"));
     }
 
 }

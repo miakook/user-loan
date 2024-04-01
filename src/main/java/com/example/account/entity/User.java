@@ -1,9 +1,11 @@
 package com.example.account.entity;
 
 import jakarta.persistence.*;
+import lombok.Setter;
 
 import java.time.LocalDate;
 
+@Setter
 @Entity
 public class User {
 
