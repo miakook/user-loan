@@ -5,7 +5,7 @@ import com.example.account.common.Response;
 import com.example.account.common.exception.UserLoanException;
 import com.example.account.dto.UserLoanDto;
 import com.example.account.dto.UserLoanFormDto;
-import com.example.account.service.LoanService;
+import com.example.account.service.UserLoanService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +19,7 @@ import java.util.List;
 @RequestMapping("/api/v1/loans")
 public class LoanController {
 
-    private final LoanService loanService;
+    private final UserLoanService userLoanService;
 
     private static final Response INTERNAL_SERVER_ERROR = Response.errorResponse(500, new ErrorResponse("Internal Server Error"));
 
@@ -27,7 +27,7 @@ public class LoanController {
     public Response<Boolean> addLoan(@RequestHeader("userId") long userId,
                                          @Valid @RequestBody UserLoanFormDto form) {
         try {
-            Boolean success = loanService.create(userId, form);
+            Boolean success = userLoanService.create(userId, form);
         } catch (UserLoanException e) {
             return Response.errorResponse(400, new ErrorResponse(e.getMessage()));
         } catch (Exception e) {
@@ -41,7 +41,7 @@ public class LoanController {
     @GetMapping
     public Response<List<UserLoanDto>> getLoanList(@RequestHeader("userId") long userId) {
         try {
-            List<UserLoanDto> loan = loanService.getLoans(userId);
+            List<UserLoanDto> loan = userLoanService.getLoans(userId);
             return Response.success(loan);
         } catch (Exception e) {
             return INTERNAL_SERVER_ERROR;
@@ -52,7 +52,7 @@ public class LoanController {
     public Response<UserLoanDto> getLoanDetail(@RequestHeader("userId") long userId,
                                          @PathVariable("loanId") long userLoanId) {
         try {
-            UserLoanDto loan = loanService.getLoanDetail(userId, userLoanId);
+            UserLoanDto loan = userLoanService.getLoanDetail(userId, userLoanId);
             return Response.success(loan);
         } catch (UserLoanException e) {
             return Response.errorResponse(401, new ErrorResponse("Invalid access"));
@@ -62,7 +62,7 @@ public class LoanController {
     @DeleteMapping("/{loanId}")
     public Response<UserLoanDto> deleteLoan(@RequestHeader("userId") long userId,
                                          @PathVariable("loanId") long userLoanId) {
-        loanService.delete(userId, userLoanId);
+        userLoanService.delete(userId, userLoanId);
         return Response.success(true);
 
     }

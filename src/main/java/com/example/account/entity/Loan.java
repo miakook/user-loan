@@ -1,9 +1,11 @@
 package com.example.account.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
 
 import java.math.BigDecimal;
 
+@Getter
 @Entity
 public class Loan {
 

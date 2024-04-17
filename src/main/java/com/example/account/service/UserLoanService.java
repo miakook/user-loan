@@ -4,10 +4,13 @@ import com.example.account.common.exception.UserLoanException;
 import com.example.account.dto.UserLoanFormDto;
 import com.example.account.dto.UserLoanDto;
 import com.example.account.dto.converter.UserLoanDtoConverter;
+import com.example.account.entity.Loan;
 import com.example.account.entity.UserLoan;
 import com.example.account.entity.UserLoanExtension;
+import com.example.account.repository.LoanRepository;
 import com.example.account.repository.UserLoanExtensionRepository;
 import com.example.account.repository.UserLoanRepository;
+import com.example.account.service.validator.UserLoanValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,20 +19,18 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
 
 @RequiredArgsConstructor
 @Service
-public class LoanService {
+public class UserLoanService {
 
     private final UserLoanRepository userLoanRepository;
+    private final UserLoanValidator userLoanValidator;
     private final UserLoanExtensionRepository extensionRepository;
     private final UserLoanDtoConverter converter;
 
     public Boolean create(long userId, UserLoanFormDto form) {
-        validateForm(form);
-        validateLoanType(form.getLoanTypeId());
-        validateInput(form);
+        userLoanValidator.validate(form);
 
         UserLoan loan = new UserLoan();
         loan.setUserId(userId);
@@ -85,25 +86,6 @@ public class LoanService {
         }
 
         return Boolean.TRUE;
-    }
-
-    private void validateForm(UserLoanFormDto form) {
-        if (isNull(form)
-                || isNull(form.getLoanTypeId())
-                || isNull(form.getInterestRate())
-                || isNull(form.getStartedAt())
-                || isNull(form.getRepaymentDate())
-                || isNull(form.getMaturity())
-                || isNull(form.getTotalAmount())
-                || isNull(form.getTotalRepayment())) {
-            throw new UserLoanException("Invalid input");
-        }
-    }
-
-    private void validateLoanType(Long loanTypeId) {
-    }
-
-    private void validateInput(UserLoanFormDto form) {
     }
 
 }
