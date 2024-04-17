@@ -13,7 +13,7 @@ public class UserLoanExtension {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userLoanExtensionId;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private Long userLoanId;
 
     @Column(nullable = false)
@@ -23,7 +23,7 @@ public class UserLoanExtension {
     private String customName;
 
     @Column(nullable = false)
-    private Integer remainingDate;
+    private Integer termToMaturity;
 
     @Column(nullable = false)
     private Long remainingAmount;

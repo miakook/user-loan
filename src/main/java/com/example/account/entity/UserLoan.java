@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -26,13 +26,13 @@ public class UserLoan {
     private BigDecimal interestRate;
 
     @Column(nullable = false)
-    private LocalDateTime startedAt;
+    private LocalDate startedAt;
+
+    @Column(nullable = false)
+    private LocalDate maturity;
 
     @Column(nullable = false)
     private Integer repaymentDate;
-
-    @Column(nullable = false)
-    private Integer term; // TODO in day? month?
 
     @Column(nullable = false)
     private Long totalAmount;

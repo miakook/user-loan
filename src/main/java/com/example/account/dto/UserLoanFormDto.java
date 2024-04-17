@@ -4,21 +4,22 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @Getter
-public class LoanFormDto {
+public class UserLoanFormDto {
 
-    private Long loanId;
+    private Long loanTypeId;
 
     private BigDecimal interestRate;
 
-    private LocalDateTime startedAt;
+    private LocalDate startedAt;
+
+    private LocalDate maturity;
 
     private Integer repaymentDate;
-
-    private Integer term;
 
     private Long totalAmount;
 

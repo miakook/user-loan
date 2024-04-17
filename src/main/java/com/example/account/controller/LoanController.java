@@ -2,7 +2,7 @@ package com.example.account.controller;
 
 import com.example.account.common.ErrorResponse;
 import com.example.account.common.Response;
-import com.example.account.dto.LoanFormDto;
+import com.example.account.dto.UserLoanFormDto;
 import com.example.account.dto.UserLoanDto;
 import com.example.account.service.LoanService;
 import jakarta.validation.Valid;
@@ -21,7 +21,7 @@ public class LoanController {
 
     @PostMapping
     public Response<Boolean> addLoan(@RequestHeader("userId") long userId,
-                                         @Valid @RequestBody LoanFormDto form) {
+                                         @Valid @RequestBody UserLoanFormDto form) {
         Boolean success = loanService.create(userId, form);
 
         return BooleanUtils.isTrue(success) ? Response.success(true)

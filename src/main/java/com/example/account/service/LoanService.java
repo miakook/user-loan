@@ -24,18 +24,18 @@ public class LoanService {
     private final UserLoanExtensionRepository extensionRepository;
     private final UserLoanDtoConverter converter;
 
-    public Boolean create(long userId, LoanFormDto form) {
+    public Boolean create(long userId, UserLoanFormDto form) {
         if (!isValid(form)) {
             return Boolean.FALSE;
         }
 
         UserLoan loan = new UserLoan();
         loan.setUserId(userId);
-        loan.setLoanId(form.getLoanId());
+        loan.setLoanId(form.getLoanTypeId());
         loan.setInterestRate(form.getInterestRate());
         loan.setStartedAt(form.getStartedAt());
         loan.setRepaymentDate(form.getRepaymentDate());
-        loan.setTerm(form.getTerm());
+        loan.setMaturity(form.getMaturity());
         loan.setTotalAmount(form.getTotalAmount());
         loan.setTotalRepayment(form.getTotalRepayment());
         userLoanRepository.save(loan);
@@ -76,13 +76,13 @@ public class LoanService {
         return Boolean.TRUE;
     }
 
-    private boolean isValid(LoanFormDto form) {
+    private boolean isValid(UserLoanFormDto form) {
         return nonNull(form)
-                && nonNull(form.getLoanId())
+                && nonNull(form.getLoanTypeId())
                 && nonNull(form.getInterestRate())
                 && nonNull(form.getStartedAt())
                 && nonNull(form.getRepaymentDate())
-                && nonNull(form.getTerm())
+                && nonNull(form.getMaturity())
                 && nonNull(form.getTotalAmount())
                 && nonNull(form.getTotalRepayment());
     }
