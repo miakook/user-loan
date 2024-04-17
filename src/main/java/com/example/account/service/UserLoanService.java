@@ -12,19 +12,22 @@ import com.example.account.repository.UserLoanExtensionRepository;
 import com.example.account.repository.UserLoanRepository;
 import com.example.account.service.validator.UserLoanValidator;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static java.util.Objects.isNull;
-
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class UserLoanService {
 
     private final UserLoanRepository userLoanRepository;
+    private final LoanRepository loanRepository;
     private final UserLoanValidator userLoanValidator;
     private final UserLoanExtensionRepository extensionRepository;
     private final UserLoanDtoConverter converter;
@@ -32,16 +35,32 @@ public class UserLoanService {
     public Boolean create(long userId, UserLoanFormDto form) {
         userLoanValidator.validate(form);
 
-        UserLoan loan = new UserLoan();
-        loan.setUserId(userId);
-        loan.setLoanId(form.getLoanTypeId());
-        loan.setInterestRate(form.getInterestRate());
-        loan.setStartedAt(form.getStartedAt());
-        loan.setRepaymentDate(form.getRepaymentDate());
-        loan.setMaturity(form.getMaturity());
-        loan.setTotalAmount(form.getTotalAmount());
-        loan.setTotalRepayment(form.getTotalRepayment());
-        userLoanRepository.save(loan);
+        Loan loan = getLoan(form);
+        userLoanValidator.validateInput(form, loan);
+
+        UserLoan userLoan = new UserLoan();
+        userLoan.setUserId(userId);
+        userLoan.setLoanId(form.getLoanTypeId());
+        userLoan.setInterestRate(form.getInterestRate());
+        userLoan.setStartedAt(form.getStartedAt());
+        userLoan.setRepaymentDate(form.getRepaymentDate());
+        userLoan.setMaturity(form.getMaturity());
+        userLoan.setTotalAmount(form.getTotalAmount());
+        userLoan.setTotalRepayment(form.getTotalRepayment());
+        userLoan = userLoanRepository.save(userLoan);
+
+        try {
+            UserLoanExtension extension = new UserLoanExtension();
+            extension.setName(loan.getName());
+            extension.setUserLoanId(userLoan.getUserLoanId());
+            extension.setCustomName(form.getCustomName());
+            extension.setTermToMaturity(calcTerm(form));
+            extension.setRemainingAmount(caldRemainAmount(form));
+            extensionRepository.save(extension);
+        } catch (Exception e) {
+            log.warn("extension save error", e);
+        }
+
         return Boolean.TRUE;
     }
 
@@ -86,6 +105,23 @@ public class UserLoanService {
         }
 
         return Boolean.TRUE;
+    }
+
+    private Loan getLoan(UserLoanFormDto form) {
+        Optional<Loan> optionalLoan = loanRepository.findById(form.getLoanTypeId());
+        if (optionalLoan.isEmpty()) {
+            throw new UserLoanException("Invalid Loan Type");
+        }
+        Loan loan = optionalLoan.get();
+        return loan;
+    }
+
+    private long calcTerm(UserLoanFormDto form) {
+        return ChronoUnit.DAYS.between(LocalDate.now(), form.getMaturity());
+    }
+
+    private long caldRemainAmount(UserLoanFormDto form) {
+        return form.getTotalAmount() - form.getTotalRepayment();
     }
 
 }

@@ -25,4 +25,7 @@ public class UserLoanFormDto {
 
     private Long totalRepayment;
 
+    private String customName;
+
+
 }

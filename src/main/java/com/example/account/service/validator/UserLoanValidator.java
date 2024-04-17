@@ -3,12 +3,10 @@ package com.example.account.service.validator;
 import com.example.account.common.exception.UserLoanException;
 import com.example.account.dto.UserLoanFormDto;
 import com.example.account.entity.Loan;
-import com.example.account.repository.LoanRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.util.Optional;
 
 import static java.util.Objects.isNull;
 
@@ -16,16 +14,7 @@ import static java.util.Objects.isNull;
 @Component
 public class UserLoanValidator {
 
-    private final LoanRepository loanRepository;
-
     public void validate(UserLoanFormDto form) {
-        validateInput(form);
-        validateLoanType(form);
-        validateRepayment(form);
-
-    }
-
-    private void validateInput(UserLoanFormDto form) {
         if (isNull(form)
                 || isNull(form.getLoanTypeId())
                 || isNull(form.getInterestRate())
@@ -38,13 +27,12 @@ public class UserLoanValidator {
         }
     }
 
-    private void validateLoanType(UserLoanFormDto form) {
-        Optional<Loan> optionalLoan = loanRepository.findById(form.getLoanTypeId());
-        if (optionalLoan.isEmpty()) {
-            throw new UserLoanException("Invalid Loan Type");
-        }
+    public void validateInput(UserLoanFormDto form, Loan loan) {
+        validateLoanType(form, loan);
+        validateRepayment(form);
+    }
 
-        Loan loan = optionalLoan.get();
+    private void validateLoanType(UserLoanFormDto form, Loan loan) {
         if (form.getTotalAmount() > loan.getLimitAmount()) {
             throw new UserLoanException("Total amount cannot exceed " + loan.getLimitAmount());
         }

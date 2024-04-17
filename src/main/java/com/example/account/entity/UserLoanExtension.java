@@ -23,7 +23,7 @@ public class UserLoanExtension {
     private String customName;
 
     @Column(nullable = false)
-    private Integer termToMaturity;
+    private Long termToMaturity;
 
     @Column(nullable = false)
     private Long remainingAmount;
