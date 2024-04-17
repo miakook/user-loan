@@ -2,16 +2,18 @@ package com.example.account.controller;
 
 import com.example.account.common.ErrorResponse;
 import com.example.account.common.Response;
-import com.example.account.dto.UserLoanFormDto;
+import com.example.account.common.exception.UserLoanException;
 import com.example.account.dto.UserLoanDto;
+import com.example.account.dto.UserLoanFormDto;
 import com.example.account.service.LoanService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.BooleanUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Slf4j
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1/loans")
@@ -19,13 +21,21 @@ public class LoanController {
 
     private final LoanService loanService;
 
+    private static final Response INTERNAL_SERVER_ERROR = Response.errorResponse(500, new ErrorResponse("Internal Server Error"));
+
     @PostMapping
     public Response<Boolean> addLoan(@RequestHeader("userId") long userId,
                                          @Valid @RequestBody UserLoanFormDto form) {
-        Boolean success = loanService.create(userId, form);
+        try {
+            Boolean success = loanService.create(userId, form);
+        } catch (UserLoanException e) {
+            return Response.errorResponse(400, new ErrorResponse(e.getMessage()));
+        } catch (Exception e) {
+            log.error("Loan creation error!", e);
+            return INTERNAL_SERVER_ERROR;
+        }
 
-        return BooleanUtils.isTrue(success) ? Response.success(true)
-                : Response.errorResponse(400, new ErrorResponse("Bad request: invalid input"));
+        return Response.success(true);
     }
 
     @GetMapping
@@ -34,7 +44,7 @@ public class LoanController {
             List<UserLoanDto> loan = loanService.getLoans(userId);
             return Response.success(loan);
         } catch (Exception e) {
-            return Response.errorResponse(500, new ErrorResponse("internal server error"));
+            return INTERNAL_SERVER_ERROR;
         }
     }
 
@@ -44,7 +54,7 @@ public class LoanController {
         try {
             UserLoanDto loan = loanService.getLoanDetail(userId, userLoanId);
             return Response.success(loan);
-        } catch (Exception e) {
+        } catch (UserLoanException e) {
             return Response.errorResponse(401, new ErrorResponse("Invalid access"));
         }
     }

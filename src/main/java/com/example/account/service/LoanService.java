@@ -1,5 +1,6 @@
 package com.example.account.service;
 
+import com.example.account.common.exception.UserLoanException;
 import com.example.account.dto.UserLoanFormDto;
 import com.example.account.dto.UserLoanDto;
 import com.example.account.dto.converter.UserLoanDtoConverter;
@@ -14,6 +15,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 @RequiredArgsConstructor
@@ -25,9 +27,9 @@ public class LoanService {
     private final UserLoanDtoConverter converter;
 
     public Boolean create(long userId, UserLoanFormDto form) {
-        if (!isValid(form)) {
-            return Boolean.FALSE;
-        }
+        validateForm(form);
+        validateLoanType(form.getLoanTypeId());
+        validateInput(form);
 
         UserLoan loan = new UserLoan();
         loan.setUserId(userId);
@@ -49,13 +51,13 @@ public class LoanService {
                 .collect(Collectors.toList());
     }
 
-    public UserLoanDto getLoanDetail(long userId, long userLoanId) throws Exception {
+    public UserLoanDto getLoanDetail(long userId, long userLoanId) {
         Optional<UserLoan> loanOptional = userLoanRepository.findById(userLoanId);
         if (!loanOptional.isPresent()) {
-            throw new Exception("loan not found");
+            throw new UserLoanException("loan not found");
         }
         if (loanOptional.get().getUserId() != userId) {
-            throw new Exception("userId of userLoan does not match");
+            throw new UserLoanException("userId of userLoan does not match");
         }
 
         UserLoan loan = loanOptional.get();
@@ -85,15 +87,23 @@ public class LoanService {
         return Boolean.TRUE;
     }
 
-    private boolean isValid(UserLoanFormDto form) {
-        return nonNull(form)
-                && nonNull(form.getLoanTypeId())
-                && nonNull(form.getInterestRate())
-                && nonNull(form.getStartedAt())
-                && nonNull(form.getRepaymentDate())
-                && nonNull(form.getMaturity())
-                && nonNull(form.getTotalAmount())
-                && nonNull(form.getTotalRepayment());
+    private void validateForm(UserLoanFormDto form) {
+        if (isNull(form)
+                || isNull(form.getLoanTypeId())
+                || isNull(form.getInterestRate())
+                || isNull(form.getStartedAt())
+                || isNull(form.getRepaymentDate())
+                || isNull(form.getMaturity())
+                || isNull(form.getTotalAmount())
+                || isNull(form.getTotalRepayment())) {
+            throw new UserLoanException("Invalid input");
+        }
+    }
+
+    private void validateLoanType(Long loanTypeId) {
+    }
+
+    private void validateInput(UserLoanFormDto form) {
     }
 
 }
