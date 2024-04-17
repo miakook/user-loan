@@ -1,6 +1,6 @@
 package com.example.account.service;
 
-import com.example.account.dto.LoanFormDto;
+import com.example.account.dto.UserLoanFormDto;
 import com.example.account.dto.UserLoanDto;
 import com.example.account.dto.converter.UserLoanDtoConverter;
 import com.example.account.entity.UserLoan;
@@ -67,12 +67,21 @@ public class LoanService {
 
     public Boolean delete(long userId, long userLoanId) {
         Optional<UserLoan> loanOptional = userLoanRepository.findById(userLoanId);
-        if (loanOptional.isPresent()) {
-            UserLoan loan = loanOptional.get();
-            if (loan.getUserId() == userId) {
-                userLoanRepository.delete(loan);
-            }
+        if (loanOptional.isEmpty()) {
+            return Boolean.FALSE;
         }
+
+        UserLoan loan = loanOptional.get();
+        if (loan.getUserId() != userId) {
+            return Boolean.FALSE;
+        }
+
+        userLoanRepository.delete(loan);
+        Optional<UserLoanExtension> extension = extensionRepository.findByUserLoanId(loan.getUserLoanId());
+        if (extension.isPresent()) {
+            extensionRepository.delete(extension.get());
+        }
+
         return Boolean.TRUE;
     }
 
